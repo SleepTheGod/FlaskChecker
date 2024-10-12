@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Username Availability Checker</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Username Availability Checker</h1>
+        <form id="username-form">
+            <textarea name="usernames" placeholder="Enter usernames (one per line)" required></textarea>
+            <div>
+                <h3>Select Platforms:</h3>
+                {% for platform in platforms %}
+                <label>
+                    <input type="checkbox" name="platforms" value="{{ platform|lower() }}">
+                    {{ platform }}
+                </label>
+                {% endfor %}
+            </div>
+            <button type="submit">Check Usernames</button>
+        </form>
+        <div id="results"></div>
+    </div>
+    <script>
+        $(document).ready(function() {
+            $('#username-form').submit(function(e) {
+                e.preventDefault();
+                $('#results').empty();
+                $('#results').append('<p>Checking...</p>');
+
+                $.ajax({
+                    url: '/check_usernames',
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(data) {
+                        $('#results').empty();
+                        $.each(data, function(key, value) {
+                            $('#results').append('<p>' + key[0] + ' - ' + key[1] + ': ' + value + '</p>');
+                        });
+                    },
+                    error: function() {
+                        $('#results').empty();
+                        $('#results').append('<p>Error occurred while checking usernames.</p>');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
